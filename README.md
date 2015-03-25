@@ -1,7 +1,12 @@
-Parallel Forall Code Samples
+Parallel Forall Code Samples [Hopobcn Version]
 ============================
 
 This repository contains source code examples from the NVIDIA [Parallel Forall Blog](http://developer.nvidia.com/parallel-forall).
+
+## Quick Instructions
+
+$ git clone https://github.com/Hopobcn/code-samples
+$ git submodule update --init --recursive
 
 License
 -------
