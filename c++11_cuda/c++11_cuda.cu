@@ -3,6 +3,7 @@
 #include <thrust/execution_policy.h>
 
 #include <iostream>
+#include <sys/stat.h>
 
 /////////////////////////////////////////////////////////////////
 // Some utility code to define grid_stride_range
@@ -81,8 +82,12 @@ void xyzw_frequency_thrust_host(int *count, char *text, int n)
 int main(int argc, char** argv)
 { 
   const char *filename = "warandpeace.txt";
-    
-  int numBytes = 16*1048576;
+  struct stat buf;
+
+  stat( filename, &buf );
+
+  int numBytes = buf.st_size;
+  std::cout << "File size: " << numBytes << " bytes" << std::endl;
   char *h_text = (char*)malloc(numBytes);
 
   char *d_text;
