@@ -155,8 +155,13 @@ int main(int argc, char** argv)
   
   RunTest("device_reduce_block_atomic",device_reduce_block_atomic,NUM_ELEMS,REPEAT,vals,checksum);
   RunTest("device_reduce_block_atomic_vector2",device_reduce_block_atomic_vector2,NUM_ELEMS,REPEAT,vals,checksum);
-  //RunTest("device_reduce_block_atomic_vector4",device_reduce_block_atomic_vector4,NUM_ELEMS,REPEAT,vals,checksum);
-  
+  RunTest("device_reduce_block_atomic_vector4",device_reduce_block_atomic_vector4,NUM_ELEMS,REPEAT,vals,checksum);
+ 
+  RunTest("device_reduce_block_atomic_range_loop",device_reduce_block_atomic_range_loop,NUM_ELEMS,REPEAT,vals,checksum);
+  RunTest("device_reduce_block_atomic_vector2_range_loop",device_reduce_block_atomic_vector2_range_loop,NUM_ELEMS,REPEAT,vals,checksum);
+  RunTest("device_reduce_block_atomic_vector4_range_loop",device_reduce_block_atomic_vector4_range_loop,NUM_ELEMS,REPEAT,vals,checksum);
+
+
   RunTest("device_reduce_stable",device_reduce_stable,NUM_ELEMS,REPEAT,vals,checksum);
   RunTest("device_reduce_stable_vector2",device_reduce_stable_vector2,NUM_ELEMS,REPEAT,vals,checksum);
   //RunTest("device_reduce_stable_vector4",device_reduce_stable_vector4,NUM_ELEMS,REPEAT,vals,checksum);

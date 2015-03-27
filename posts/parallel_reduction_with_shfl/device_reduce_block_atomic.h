@@ -15,6 +15,14 @@ void device_reduce_block_atomic_kernel(int *in, int* out, int N) {
         atomicAdd(out,sum);
 }
 
+void device_reduce_block_atomic(int *in, int* out, int N) {
+    int threads = 256;
+    int blocks = min((N+threads-1)/threads,2048);
+
+    cudaMemsetAsync(out, 0, sizeof(int));
+    device_reduce_block_atomic_kernel<<<blocks,threads>>>(in, out, N); 
+}
+
 __global__ 
 void device_reduce_block_atomic_kernel_range_loop(int *in, int* out, int N) {
     int sum = int(0);
@@ -26,13 +34,11 @@ void device_reduce_block_atomic_kernel_range_loop(int *in, int* out, int N) {
         atomicAdd(out,sum);
 }
 
-
-void device_reduce_block_atomic(int *in, int* out, int N) {
-    int threads=256;
-    int blocks=min((N+threads-1)/threads,2048);
+void device_reduce_block_atomic_range_loop(int *in, int* out, int N) {
+    int threads = 256;
+    int blocks = min((N+threads-1)/threads,2048);
 
     cudaMemsetAsync(out, 0, sizeof(int));
-    //device_reduce_block_atomic_kernel<<<blocks,threads>>>(in, out, N); 
     device_reduce_block_atomic_kernel_range_loop<<<blocks,threads>>>(in, out, N);
 }
 
@@ -52,6 +58,15 @@ void device_reduce_block_atomic_kernel_vector2(int *in, int* out, int N) {
         atomicAdd(out,sum);
 }
 
+void device_reduce_block_atomic_vector2(int *in, int* out, int N) {
+    int threads = 256;
+    int blocks = min((N/2+threads-1)/threads,2048);
+
+    cudaMemsetAsync(out,0,sizeof(int));
+    device_reduce_block_atomic_kernel_vector2<<<blocks,threads>>>(in,out,N);
+}
+
+
 __global__ 
 void device_reduce_block_atomic_kernel_vector2_range_loop(int *in, int* out, int N) {
     int sum=0;
@@ -68,35 +83,59 @@ void device_reduce_block_atomic_kernel_vector2_range_loop(int *in, int* out, int
 }
 
 
-void device_reduce_block_atomic_vector2(int *in, int* out, int N) {
+void device_reduce_block_atomic_vector2_range_loop(int *in, int* out, int N) {
     int threads = 256;
     int blocks = min((N/2+threads-1)/threads,2048);
 
     cudaMemsetAsync(out,0,sizeof(int));
-//    device_reduce_block_atomic_kernel_vector2<<<blocks,threads>>>(in,out,N);
     device_reduce_block_atomic_kernel_vector2_range_loop<<<blocks,threads>>>(in,out,N); 
 }
 
-__global__ void device_reduce_block_atomic_kernel_vector4(int *in, int* out, int N) {
-  int sum=0;
-  int idx=blockIdx.x*blockDim.x+threadIdx.x;
-  for(int i=idx;i<N/4;i+=blockDim.x*gridDim.x) {
-    int4 val=reinterpret_cast<int4*>(in)[i];
-    sum+=(val.x+val.y)+(val.z+val.w);
-  }
-  int i=idx+N/4*4;
-  if(i<N) 
-    sum+=in[i];
+__global__ 
+void device_reduce_block_atomic_kernel_vector4(int *in, int* out, int N) {
+    int sum=0;
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    for (int i=idx; i < N/4; i += blockDim.x*gridDim.x) {
+        int4 val=reinterpret_cast<int4*>(in)[i];
+        sum += (val.x+val.y)+(val.z+val.w);
+    }
+    int i = idx+N/4*4;
+    if (i < N) 
+        sum += in[i];
   
-  sum=blockReduceSum(sum);
-  if(threadIdx.x==0)
-    atomicAdd(out,sum);
+    sum = blockReduceSum(sum);
+    if (threadIdx.x == 0)
+        atomicAdd(out,sum);
 }
 
 void device_reduce_block_atomic_vector4(int *in, int* out, int N) {
-  int threads=256;
-  int blocks=min((N/4+threads-1)/threads,2048);
+    int threads=256;
+    int blocks=min((N/4+threads-1)/threads,2048);
 
-  cudaMemsetAsync(out,0,sizeof(int));
-  device_reduce_block_atomic_kernel_vector4<<<blocks,threads>>>(in,out,N); 
+    cudaMemsetAsync(out,0,sizeof(int));
+    device_reduce_block_atomic_kernel_vector4<<<blocks,threads>>>(in,out,N); 
+}
+
+__global__ 
+void device_reduce_block_atomic_kernel_vector4_range_loop(int *in, int* out, int N) {
+    int sum=0;
+    for (auto i : grid_stride_range(0, N/4)) {
+        int4 val=reinterpret_cast<int4*>(in)[i];
+        sum += (val.x + val.y) + (val.z + val.w);
+    }
+    int i = blockIdx.x * blockDim.x + threadIdx.x + N/4*4;
+    if (i < N) 
+        sum += in[i];
+  
+    sum = blockReduceSum(sum);
+    if (threadIdx.x == 0)
+        atomicAdd(out,sum);
+}
+
+void device_reduce_block_atomic_vector4_range_loop(int *in, int* out, int N) {
+    int threads = 256;
+    int blocks = min((N/4+threads-1)/threads,2048);
+
+    cudaMemsetAsync(out,0,sizeof(int));
+    device_reduce_block_atomic_kernel_vector4<<<blocks,threads>>>(in,out,N); 
 }
