@@ -6,6 +6,7 @@ This repository contains source code examples from the NVIDIA [Parallel Forall B
 ## Quick Instructions
 
 $ git clone https://github.com/Hopobcn/code-samples
+
 $ git submodule update --init --recursive
 
 License
